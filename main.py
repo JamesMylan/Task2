@@ -5,35 +5,41 @@ gridsize = 10
 gamegrid = np.full((gridsize,gridsize), " ")
 playerturn = True
 game = True
-debug = True
+debug = False
 def endgame(value):
     global game
     game = False
     if value == "X":
         print("Player 1 win")
+        print(gamegrid)
     else:
-        print("Player 2 win")
+        print("AI win")
+        print(gamegrid)
     exit()
 def clear():
     global debug
     if debug == False:
         os.system('cls')
 def checkwin():
+    #check for win horizontally
     for row in gamegrid:
-        if "XXXXX" in ''.join(row):
+        if "XXXXX" in ''.join(row): #joins all values in row into a string
             endgame("X")
+        if "OOOOO" in ''.join(row):
+            endgame("O")
+    #check for win vertically
+    for i in range(len(gamegrid)):
+        if "XXXXX" in ''.join(gamegrid[:,i]):
+            endgame("X")
+        if "OOOOO" in ''.join(gamegrid[:,i]):
+            endgame("O")
+    #check for win diagonally
+    for i in range(-(gridsize-1),(gridsize)):
+        if "XXXXX" in ''.join(np.diag(gamegrid, i)): #joins all values in diagonal line into a string
+            endgame("X")
+        if "OOOOO" in ''.join(np.diag(gamegrid, i)):
+            endgame("O")
 
-def oldcheckwin():
-    count = 0
-    previous = None
-    for row in gamegrid:
-        for value in row:
-            if (value == previous) & (value != " "):
-                count += 1
-            if count >= 4:
-                endgame(value)
-                return True
-            previous = value
 def ai():
     global playerturn
     aiinput = (random.randrange(1,gridsize),random.randrange(1,gridsize))
@@ -44,13 +50,15 @@ def ai():
     checkwin()
     playerturn = True
 
-def func(playerinput):
+def placeinput(playerinput):
     if len(playerinput) != 2:
         raise IndexError      
     for i in playerinput:
         if i < 0:
             raise IndexError 
     if gamegrid[playerinput] != " ":
+        clear()
+        print("Space already taken")
         return True
     gamegrid[playerinput] = "X"
     clear()
@@ -65,16 +73,14 @@ def player():
             playerinput = tuple(map(int,playerinput.split()))
             playerinput = tuple(x-1 for x in playerinput)
             playerinput = playerinput[::-1]
-            playerturn = func(playerinput)
+            playerturn = placeinput(playerinput)
         except IndexError:
             clear()
             if len(playerinput) != 2:
-                print("1st Invalid input. Input should be in format: x y")
-                print(len(playerinput))  
+                print("Invalid input. Input should be in format: x y")
             else:
                 print("Input out of range")
     
 while game == True:
     player()
     ai()
-    checkwin()
