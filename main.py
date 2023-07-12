@@ -19,32 +19,48 @@ def endgame(value):
 def clear():
     global debug
     if debug == False:
-        os.system('cls')
+        if os.name=='nt':
+            os.system('cls')
+        else:
+            os.system('clear')
+def checkingrid(grid,value: str):
+    #check for value horizontally
+    for row in grid:
+        if value in ''.join(row): #joins all values in row into a string
+            return True
+    #check for value vertically
+    for i in range(len(grid)):
+        if value in ''.join(grid[:,i]):
+            return True
+    #check for value diagonally
+    for i in range(-(len(grid)-1),(len(grid))):
+        if value in ''.join(np.diag(grid, i)): #joins all values in diagonal line into a string
+            return True
+    return False
 def checkwin():
-    #check for win horizontally
-    for row in gamegrid:
-        if "XXXXX" in ''.join(row): #joins all values in row into a string
-            endgame("X")
-        if "OOOOO" in ''.join(row):
-            endgame("O")
-    #check for win vertically
-    for i in range(len(gamegrid)):
-        if "XXXXX" in ''.join(gamegrid[:,i]):
-            endgame("X")
-        if "OOOOO" in ''.join(gamegrid[:,i]):
-            endgame("O")
-    #check for win diagonally
-    for i in range(-(gridsize-1),(gridsize)):
-        if "XXXXX" in ''.join(np.diag(gamegrid, i)): #joins all values in diagonal line into a string
-            endgame("X")
-        if "OOOOO" in ''.join(np.diag(gamegrid, i)):
-            endgame("O")
+    if checkingrid(gamegrid,"XXXXX"):
+        endgame("X")
+    elif checkingrid(gamegrid,"OOOOO"):
+        endgame("O")
 
 def ai():
     global playerturn
-    aiinput = (random.randrange(1,gridsize),random.randrange(1,gridsize))
-    while gamegrid[aiinput] != " ":
+    aiinput = tuple()
+    gamegridcopy = gamegrid.copy()
+    for row in range(len(gamegridcopy)):
+        for value in range(len(gamegridcopy)):
+            if gamegrid[row,value] == " ":
+                gamegridcopy[row,value] = "X"
+            if (checkingrid(gamegridcopy,"XXXXX")) & (gamegrid[row,value] == " "):
+                if aiinput == tuple():
+                    aiinput = row,value
+            if gamegrid[row,value] == " ":
+                gamegridcopy[row,value] = " "
+    print(aiinput)
+    if aiinput == tuple():
         aiinput = (random.randrange(1,gridsize),random.randrange(1,gridsize))
+        while gamegrid[aiinput] != " ":
+            aiinput = (random.randrange(1,gridsize),random.randrange(1,gridsize))
     gamegrid[aiinput] = "O"
     clear()
     checkwin()
@@ -67,12 +83,12 @@ def placeinput(playerinput):
 def player():
     global playerturn
     while playerturn == True:
-        print(str(gamegrid).replace(' [', '').replace('[', '').replace(']', ''))
+        print(str(gamegrid).replace(' [', '').replace('[', '').replace(']', '')) #prints list without square bracket border
         playerinput = input("Enter coord: ")
         try:
             playerinput = tuple(map(int,playerinput.split()))
-            playerinput = tuple(x-1 for x in playerinput)
-            playerinput = playerinput[::-1]
+            playerinput = tuple(x-1 for x in playerinput) #subtract 1 from each coordinate
+            playerinput = playerinput[::-1] #reverses tuple from (y, x) to (x, y)
             playerturn = placeinput(playerinput)
         except IndexError:
             clear()
