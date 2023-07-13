@@ -2,7 +2,7 @@ import numpy as np
 import os
 import random
 gridsize = 10
-gamegrid = np.full((gridsize,gridsize), " ")
+gamegrid = np.full((gridsize,gridsize), " ") #gamegrid must be a square
 playerturn = True
 game = True
 debug = False
@@ -23,7 +23,7 @@ def clear():
             os.system('cls')
         else:
             os.system('clear')
-def checkingrid(grid,value: str):
+def checkingrid(grid, value: str):
     #check for value horizontally
     for row in grid:
         if value in ''.join(row): #joins all values in row into a string
@@ -42,22 +42,25 @@ def checkwin():
         endgame("X")
     elif checkingrid(gamegrid,"OOOOO"):
         endgame("O")
-
+def findmove(grid,value: str,letter: str,move):
+    gamegridcopy = grid.copy()
+    for row in range(len(gamegridcopy)):
+        for item in range(len(gamegridcopy)): #this can be done since the grid is a square
+            if grid[row,item] == " ": #only considers empty places
+                gamegridcopy[row,item] = letter
+                if checkingrid(gamegridcopy,value):
+                    move = row,item
+                gamegridcopy[row,item] = " "
+    return move
 def ai():
     global playerturn
     aiinput = tuple()
-    gamegridcopy = gamegrid.copy()
-    for row in range(len(gamegridcopy)):
-        for value in range(len(gamegridcopy)):
-            if gamegrid[row,value] == " ":
-                gamegridcopy[row,value] = "X"
-            if (checkingrid(gamegridcopy,"XXXXX")) & (gamegrid[row,value] == " "):
-                if aiinput == tuple():
-                    aiinput = row,value
-            if gamegrid[row,value] == " ":
-                gamegridcopy[row,value] = " "
-    print(aiinput)
-    if aiinput == tuple():
+    #check if opponent can make a winning move and attempt to block it
+    aiinput=findmove(gamegrid,"XXXXX","X",aiinput)
+    for i in range(5,1,-1): #attempt to continue an exisiting line
+        if aiinput == tuple():
+            aiinput=findmove(gamegrid,i*"O","O",aiinput)
+    if aiinput == tuple(): #if a move hasn't already been decided
         aiinput = (random.randrange(1,gridsize),random.randrange(1,gridsize))
         while gamegrid[aiinput] != " ":
             aiinput = (random.randrange(1,gridsize),random.randrange(1,gridsize))
@@ -65,7 +68,6 @@ def ai():
     clear()
     checkwin()
     playerturn = True
-
 def placeinput(playerinput):
     if len(playerinput) != 2:
         raise IndexError      
@@ -90,7 +92,7 @@ def player():
             playerinput = tuple(x-1 for x in playerinput) #subtract 1 from each coordinate
             playerinput = playerinput[::-1] #reverses tuple from (y, x) to (x, y)
             playerturn = placeinput(playerinput)
-        except IndexError:
+        except:
             clear()
             if len(playerinput) != 2:
                 print("Invalid input. Input should be in format: x y")
