@@ -52,22 +52,22 @@ def findmove(grid,value: str,letter: str,move):
                     move = row,item
                 gamegridcopy[row,item] = " "
     return move
-def ai():
+def ai(grid):
     global playerturn
     aiinput = tuple()
     #check if opponent can make a winning move and attempt to block it
-    aiinput=findmove(gamegrid,"XXXXX","X",aiinput)
+    aiinput=findmove(grid,"XXXXX","X",aiinput)
     for i in range(5,1,-1): #attempt to continue an exisiting line
         if aiinput == tuple():
-            aiinput=findmove(gamegrid,i*"O","O",aiinput)
+            aiinput=findmove(grid,i*"O","O",aiinput)
     if aiinput == tuple(): #if a move hasn't already been decided
         aiinput = (random.randrange(1,gridsize),random.randrange(1,gridsize))
-        while gamegrid[aiinput] != " ":
+        while grid[aiinput] != " ":
             aiinput = (random.randrange(1,gridsize),random.randrange(1,gridsize))
-    gamegrid[aiinput] = "O"
-    clear()
+    grid[aiinput] = "O"
     checkwin()
     playerturn = True
+
 def placeinput(playerinput):
     if len(playerinput) != 2:
         raise IndexError      
@@ -84,8 +84,12 @@ def placeinput(playerinput):
     return False
 def player():
     global playerturn
-    while playerturn == True:
-        print(str(gamegrid).replace(' [', '').replace('[', '').replace(']', '')) #prints list without square bracket border
+    while playerturn:
+        gamegriddisplay = gamegrid.copy()
+        #gamegriddisplay = np.c_[np.arange(1,gridsize+1),gamegriddisplay]
+        #gamegriddisplay = np.r_[[np.arange(gridsize+1)],gamegriddisplay]
+        print(str(gamegriddisplay).replace(' [', '').replace('[', '').replace(']', '')) #prints list without square bracket border
+
         playerinput = input("Enter coord: ")
         try:
             playerinput = tuple(map(int,playerinput.split()))
@@ -99,6 +103,10 @@ def player():
             else:
                 print("Input out of range")
     
-while game == True:
-    player()
-    ai()
+def main():
+    while game == True:
+        player()
+        clear()
+        ai(gamegrid)
+if __name__ == '__main__':
+    main()
