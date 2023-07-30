@@ -60,10 +60,10 @@ def ai(grid):
     aiinput=findmove(grid,"XXXXX","X",aiinput)
     if aiinput == tuple():  #if a move hasn't already been decided
        aiinput = findmove(grid,"XXXX","X",aiinput)
-    for i in range(5,1,-1): #attempt to continue an exisiting line
+    for i in range(5,1,-1): #attempt to continue an existing line
         if aiinput == tuple():
             aiinput=findmove(grid,i*"O","O",aiinput)
-    if aiinput == tuple(): #if no line can be contiued or blocked a random move is chosen
+    if aiinput == tuple(): #if no line can be continued or blocked a random move is chosen
         aiinput = (random.randrange(1,gridsize),random.randrange(1,gridsize))
         while grid[aiinput] != " ":
             aiinput = (random.randrange(1,gridsize),random.randrange(1,gridsize))
